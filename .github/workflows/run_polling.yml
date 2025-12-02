@@ -3,7 +3,7 @@ name: Run OSINT Bot (Polling)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */3 * * *' # cada 4 horas (ajusta si deseas)
+    - cron: '0 */3 * * *' # cada 3 horas (por ahora lo mantengo así)
 
 jobs:
   run-bot:
@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
 
-      - name: Sanity check: compile Python
+      - name: "Sanity check: compile Python"
         run: python -m py_compile main.py
 
       - name: Run the bot (polling)
