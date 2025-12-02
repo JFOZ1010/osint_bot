@@ -6,6 +6,8 @@ import requests
 import json
 import io
 from telegram import Update
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, ContextTypes,
     MessageHandler, filters, ConversationHandler
@@ -162,14 +164,30 @@ def main():
 
         try:
             # Mensaje amigable
-            await application.bot.send_message(
-                chat_id=chat_id,
-                text=(
-                    "🔔 Bot listo — Estoy activo en modo *polling* por un tiempo limitado. (3hrs)"
-                    "Envía /correr_bot para iniciar una consulta por cédula."
-                ),
-                parse_mode="Markdown",
+            # Calcular hora actual y hora límite en hora de Bogotá
+            try:
+                tz = ZoneInfo("America/Bogota")
+            except Exception:
+                tz = None
+            now = datetime.now(tz) if tz else datetime.now()
+            expires = now + timedelta(hours=3)
+            # Formatos: 12h con AM/PM sin cero a la izquierda
+            def fmt(dt: datetime) -> str:
+                s = dt.strftime('%I:%M %p')
+                if s.startswith('0'):
+                    s = s[1:]
+                return s
+
+            now_str = fmt(now)
+            expires_str = fmt(expires)
+            timezone_label = "Bogotá (COL)"
+
+            msg = (
+                f"🔔 *Bot listo* — Hora de envío: {now_str} ({timezone_label}).\n"
+                f"Tienes disponible la herramienta hasta las *{expires_str}* ({timezone_label}) — 3 horas desde ahora.\n\n"
+                "Envía /correr_bot y escribe la cédula (solo dígitos) cuando quieras."
             )
+            await application.bot.send_message(chat_id=chat_id, text=msg, parse_mode="Markdown")
         except Exception as e:
             logger.exception("Error enviando notificación de inicio: %s", e)
 
