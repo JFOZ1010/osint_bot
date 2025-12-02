@@ -3,7 +3,7 @@ name: Run OSINT Bot (Polling)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */4 * * *' # cada 4 horas (ajusta si deseas)
+    - cron: '0 */3 * * *' # cada 4 horas (ajusta si deseas)
 
 jobs:
   run-bot:
@@ -11,7 +11,7 @@ jobs:
     concurrency:
       group: osint-bot
       cancel-in-progress: true
-    timeout-minutes: 360 # 6 horas
+    timeout-minutes: 180 # 3 horas
 
     steps:
       - name: Checkout code
@@ -36,6 +36,6 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           API_AUTH: ${{ secrets.API_AUTH }}
           ALLOWED_USER_IDS: ${{ secrets.ALLOWED_USER_IDS }}
+          STATUS_CHAT_ID: ${{ secrets.STATUS_CHAT_ID }}
         run: |
-          # You can change behavior with env vars (e.g. WEBHOOK_URL set for webhook)
           python main.py

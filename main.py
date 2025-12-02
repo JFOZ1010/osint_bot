@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 ASKING_CEDULA = 1
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+STATUS_CHAT_ID = os.getenv("STATUS_CHAT_ID")
 API_URL = os.getenv("API_URL")
 API_AUTH = os.getenv("API_AUTH")
 
@@ -138,7 +139,41 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 def main():
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    # Notificar cuando la aplicación se inicia (post_init) si STATUS_CHAT_ID o ALLOWED_IDS están configurados
+    async def notify_ready(application):
+        # Priorizar STATUS_CHAT_ID si está configurado
+        chat_id = None
+        if STATUS_CHAT_ID:
+            try:
+                chat_id = int(STATUS_CHAT_ID)
+            except Exception:
+                chat_id = None
+
+        if chat_id is None and ALLOWED_IDS:
+            # seleccionar uno de los IDs permitidos (el primero)
+            try:
+                chat_id = next(iter(ALLOWED_IDS))
+            except Exception:
+                chat_id = None
+
+        if chat_id is None:
+            # nada que notificar
+            return
+
+        try:
+            # Mensaje amigable
+            await application.bot.send_message(
+                chat_id=chat_id,
+                text=(
+                    "🔔 Bot listo — Estoy activo en modo *polling* por un tiempo limitado. (3hrs)"
+                    "Envía /correr_bot para iniciar una consulta por cédula."
+                ),
+                parse_mode="Markdown",
+            )
+        except Exception as e:
+            logger.exception("Error enviando notificación de inicio: %s", e)
+
+    app = ApplicationBuilder().post_init(notify_ready).token(TELEGRAM_TOKEN).build()
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("correr_bot", correr_bot_cmd)],
