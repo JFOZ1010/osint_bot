@@ -8,7 +8,6 @@ import io
 from telegram import Update
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import html as _html
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, ContextTypes,
     MessageHandler, filters, ConversationHandler
@@ -179,8 +178,8 @@ def main():
                     s = s[1:]
                 return s
 
-            now_str = _html.escape(fmt(now))
-            expires_str = _html.escape(fmt(expires))
+            now_str = fmt(now)
+            expires_str = fmt(expires)
             timezone_label = "Bogotá (COL)"
 
             # Usar HTML para evitar problemas de parsing en Markdown
@@ -190,7 +189,6 @@ def main():
                 "Envía <code>/correr_bot</code> y escribe la cédula (solo dígitos) cuando quieras."
             )
             await application.bot.send_message(chat_id=chat_id, text=msg_html, parse_mode="HTML")
-            logger.info("notify_ready message sent to chat_id=%s", chat_id)
         except Exception as e:
             logger.exception("Error enviando notificación de inicio: %s", e)
 
