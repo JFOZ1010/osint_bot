@@ -8,6 +8,7 @@ import io
 from telegram import Update
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import html as _html
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, ContextTypes,
     MessageHandler, filters, ConversationHandler
@@ -178,16 +179,18 @@ def main():
                     s = s[1:]
                 return s
 
-            now_str = fmt(now)
-            expires_str = fmt(expires)
+            now_str = _html.escape(fmt(now))
+            expires_str = _html.escape(fmt(expires))
             timezone_label = "Bogotá (COL)"
 
-            msg = (
-                f"🔔 *Bot listo* — Hora de envío: {now_str} ({timezone_label}).\n"
-                f"Tienes disponible la herramienta hasta las *{expires_str}* ({timezone_label}) — 3 horas desde ahora.\n\n"
-                "Envía /correr_bot y escribe la cédula (solo dígitos) cuando quieras."
+            # Usar HTML para evitar problemas de parsing en Markdown
+            msg_html = (
+                f"🔔 <b>Bot listo</b> — Hora de envío: <b>{now_str}</b> ({timezone_label}).\n"
+                f"Tienes disponible la herramienta hasta las <b>{expires_str}</b> ({timezone_label}) — 3 horas desde ahora.\n\n"
+                "Envía <code>/correr_bot</code> y escribe la cédula (solo dígitos) cuando quieras."
             )
-            await application.bot.send_message(chat_id=chat_id, text=msg, parse_mode="Markdown")
+            await application.bot.send_message(chat_id=chat_id, text=msg_html, parse_mode="HTML")
+            logger.info("notify_ready message sent to chat_id=%s", chat_id)
         except Exception as e:
             logger.exception("Error enviando notificación de inicio: %s", e)
 
