@@ -9,5 +9,9 @@ __pycache__
 # Ignore environment variable files
 .env
 .env.*
+/venv_old/
+venv_old/
+venv/
+/venv
 .vscode/
 .DS_Store
