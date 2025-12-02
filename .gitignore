@@ -1,0 +1,13 @@
+env
+/env
+__pycache__
+/__pycache__/
+/__pycache__
+*.pyc
+*.pyo
+
+# Ignore environment variable files
+.env
+.env.*
+.vscode/
+.DS_Store

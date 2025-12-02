@@ -1,0 +1,41 @@
+name: Run OSINT Bot (Polling)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */4 * * *' # cada 4 horas (ajusta si deseas)
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: osint-bot
+      cancel-in-progress: true
+    timeout-minutes: 360 # 6 horas
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      - name: Sanity check: compile Python
+        run: python -m py_compile main.py
+
+      - name: Run the bot (polling)
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          API_URL: ${{ secrets.API_URL }}
+          API_AUTH: ${{ secrets.API_AUTH }}
+          ALLOWED_USER_IDS: ${{ secrets.ALLOWED_USER_IDS }}
+        run: |
+          # You can change behavior with env vars (e.g. WEBHOOK_URL set for webhook)
+          python main.py
